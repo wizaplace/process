@@ -1,0 +1,26 @@
+{
+    "name": "wizaplace/process",
+    "description": "launch multi process concurrency",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Philippe Vandermoere",
+            "email": "philippe@wizaplace.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1.3",
+        "symfony/process": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wizaplace\\Process\\": "src/"
+        }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*",
+        "phpstan/phpstan": "^0.11.1",
+        "phpunit/phpunit": "^7"
+    }
+}

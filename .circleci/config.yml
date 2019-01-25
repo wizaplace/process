@@ -1,0 +1,69 @@
+version: 2
+jobs:
+  vendor:
+    docker:
+      - image: composer
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          key: vendor-{{ checksum "composer.lock" }}
+      - run:
+          command: |
+            composer install --ignore-platform-reqs --no-interaction --no-progress --prefer-dist --no-scripts; \
+      - save_cache:
+          key: vendor-{{ checksum "composer.lock" }}
+          paths:
+            - ./vendor
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor
+
+  phpcs:
+    docker:
+      - image: php:7.2-alpine
+    working_directory: ~/repo
+    steps:
+      - run: apk add make
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: make phpcs
+
+  phpstan:
+    docker:
+      - image: php:7.2-alpine
+    working_directory: ~/repo
+    steps:
+      - run: apk add make
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: make phpstan
+
+  phpunit:
+    docker:
+      - image: php:7.2-alpine
+    working_directory: ~/repo
+    steps:
+      - run: apk add make
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: make phpunit
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - vendor
+      - phpcs:
+          requires:
+            - vendor
+      - phpstan:
+          requires:
+            - vendor
+      - phpunit:
+          requires:
+            - vendor
