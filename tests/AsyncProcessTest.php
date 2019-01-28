@@ -144,8 +144,9 @@ class AsyncProcessTest extends TestCase
     /**
      * @dataProvider getDateTimeImmutable
      * @param null|\DateTimeImmutable $dateTime
+     * @param bool $failedProcessRules
      */
-    public function testFinishSuccess(?\DateTimeImmutable $dateTime): void
+    public function testFinishSuccess(?\DateTimeImmutable $dateTime, bool $failedProcessRules = false): void
     {
         $mockProcess = $this->createMock(Process::class);
         $mockProcess
@@ -225,6 +226,10 @@ class AsyncProcessTest extends TestCase
         ;
 
         $testedClass = new TestedClass($mockProcess);
+        if (true === $failedProcessRules) {
+            $testedClass = new TestedClass($mockProcess, function () {return false;});
+        }
+
         $testedClass
             ->addProcessEvent($mockProcessEventStart)
             ->addProcessEvent($mockProcessEventSuccess)
@@ -248,8 +253,9 @@ class AsyncProcessTest extends TestCase
     /**
      * @dataProvider getDateTimeImmutable
      * @param null|\DateTimeImmutable $dateTime
+     * @param bool $failedProcessRules
      */
-    public function testIsFinishFailed(?\DateTimeImmutable $dateTime): void
+    public function testIsFinishFailed(?\DateTimeImmutable $dateTime, bool $failedProcessRules = false): void
     {
         $mockProcess = $this->createMock(Process::class);
         $mockProcess
@@ -257,10 +263,17 @@ class AsyncProcessTest extends TestCase
             ->willReturnOnConsecutiveCalls(false, false, false, true);
         ;
 
-        $mockProcess
-            ->method('getExitCode')
-            ->willReturn(random_int(1, 255));
-        ;
+        if (false === $failedProcessRules) {
+            $mockProcess
+                ->method('getExitCode')
+                ->willReturn(random_int(1, 255))
+            ;
+        } else {
+            $mockProcess
+                ->method('getExitCode')
+                ->willReturn(0)
+            ;
+        }
 
         $mockProcess
             ->expects($this->exactly(4))
@@ -335,6 +348,10 @@ class AsyncProcessTest extends TestCase
         }
 
         $testedClass = new TestedClass($mockProcess);
+        if (true === $failedProcessRules) {
+            $testedClass = new TestedClass($mockProcess, function () {return true;});
+        }
+
         $testedClass
             ->addProcessEvent($mockProcessEventStart)
             ->addProcessEvent($mockProcessEventSuccess)
@@ -381,6 +398,11 @@ class AsyncProcessTest extends TestCase
             [new \DateTimeImmutable('2019-01-21')],
             [new \DateTimeImmutable('2018-12-31')],
             [new \DateTimeImmutable('2020-02-29')],
+            [null, true],
+            [new \DateTimeImmutable(), true],
+            [new \DateTimeImmutable('2019-01-21'), true],
+            [new \DateTimeImmutable('2018-12-31'), true],
+            [new \DateTimeImmutable('2020-02-29'), true],
         ];
     }
 }

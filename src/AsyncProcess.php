@@ -48,11 +48,18 @@ class AsyncProcess
     private $isFailed = false;
 
     /**
-     * @param Process $process
+     * @var null|callable
      */
-    public function __construct(Process $process)
+    private $processFailedRules;
+
+    /**
+     * @param Process $process
+     * @param callable $processFailedRules
+     */
+    public function __construct(Process $process, callable $processFailedRules = null)
     {
         $this->process = $process;
+        $this->processFailedRules = $processFailedRules;
     }
 
     /**
@@ -126,11 +133,20 @@ class AsyncProcess
                 $this->isFinish = true;
                 $this->finishTime = $finishTime ?? new \DateTimeImmutable();
 
-                if (0 === $this->getProcess()->getExitCode()) {
-                    $this->notifyEvent(ProcessEvent::EVENT_SUCCESS);
-                } else {
+                if (0 !== $this->getProcess()->getExitCode()) {
                     $this->isFailed = true;
+                }
+
+                if (is_callable($this->processFailedRules)
+                    && true === call_user_func_array($this->processFailedRules, [$this->getProcess()])
+                ) {
+                    $this->isFailed = true;
+                }
+
+                if (true === $this->isFailed) {
                     $this->notifyEvent(ProcessEvent::EVENT_FAILED);
+                } else {
+                    $this->notifyEvent(ProcessEvent::EVENT_SUCCESS);
                 }
             }
         }
