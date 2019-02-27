@@ -2,13 +2,20 @@
     "name": "wizaplace/process",
     "description": "launch multi process concurrency",
     "type": "library",
+    "homepage": "https://github.com/wizaplace/process",
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*",
+        "phpstan/phpstan": "^0.11.1",
+        "phpunit/phpunit": "^7"
+    },
     "license": "MIT",
     "authors": [
         {
-            "name": "Philippe Vandermoere",
-            "email": "philippe@wizaplace.com"
+            "name": "Wizaplace",
+            "email": "dev@wizaplace.com"
         }
     ],
+    "minimum-stability": "stable",
     "require": {
         "php": "^7.1.3",
         "symfony/process": "^4.2"
@@ -17,10 +24,5 @@
         "psr-4": {
             "Wizaplace\\Process\\": "src/"
         }
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer": "*",
-        "phpstan/phpstan": "^0.11.1",
-        "phpunit/phpunit": "^7"
     }
 }
